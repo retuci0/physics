@@ -7,6 +7,8 @@
 
 class Input {
 public:
+	bool keys[256];
+
 	static Input* getInstance() {
 		static Input INSTANCE;
 		return &INSTANCE;
@@ -25,6 +27,11 @@ public:
 	void onMouseMove(int mx, int my);
 	void onMouseWheel(int delta);
 
+	bool isKeyDown(int key) const;
+
 	void selectBody(const Vec2f& mousePos, RigidBody* body);
 	void unselectBody();
+
+private:
+	Input() { std::fill(std::begin(keys), std::end(keys), false); }
 };

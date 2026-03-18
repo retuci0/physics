@@ -32,14 +32,10 @@ int PhysicsEngine::run(int argc, char** argv) {
     // crear mundo
     world = std::make_unique<World>(Vec2f(0, 9.8 * 60), 0, SCREEN_WIDTH, 0, SCREEN_HEIGHT);
 
-    // crear cuerpos de prueba
-    auto shape1 = std::make_unique<CircleShape>(20.0f);
-    auto ball1 = std::make_unique<RigidBody>(Vec2f(300, 100), 1.0f, std::move(shape1));
-    world->addBody(std::move(ball1));
-
-    auto shape2 = std::make_unique<CircleShape>(20.0f);
-    auto ball2 = std::make_unique<RigidBody>(Vec2f(500, 100), 1.0f, std::move(shape2));
-    world->addBody(std::move(ball2));
+    // crear cuerpo inicial
+    auto shape = std::make_unique<CircleShape>(20.0f);
+    auto ball = std::make_unique<RigidBody>(Vec2f(300, 100), 1.0f, std::move(shape));
+    world->addBody(std::move(ball));
 
     // bucle prinipal, gestión de eventos
     Uint32 lastTime = SDL_GetTicks();
@@ -120,17 +116,18 @@ void PhysicsEngine::render() {
 
     // renderizar cuerpos
     for (auto &body : world->getBodies()) {
+        int x = static_cast<int>(std::round(body->pos.x));
+        int y = static_cast<int>(std::round(body->pos.y));
+
         if (auto circle = dynamic_cast<CircleShape*>(body->shape.get())) {
             renderer->drawFilledCircle(
-                static_cast<int>(std::round(body->pos.x)),
-                static_cast<int>(std::round(body->pos.y)),
+                x, y,
                 circle->radius,
                 Color::SILVER
             );
         } else if (auto rect = dynamic_cast<RectangleShape*>(body->shape.get())) {
             renderer->drawFilledRect(
-                static_cast<int>(std::round(body->pos.x)),
-                static_cast<int>(std::round(body->pos.y)),
+                x, y,
                 rect->halfWidth,
                 rect->halfHeight,
                 Color::GREEN
@@ -140,19 +137,23 @@ void PhysicsEngine::render() {
 
     // texto
     if (font) {
-        renderer->drawText("clic izq.: arrastrar bola | ruedita (pulsar): crear bola | clic dcho.: crear cuadrado | ruedita: cambiar tamaño",
+        renderer->drawText("clic izq.: arrastrar | ruedita (pulsar): crear | clic dcho.: eliminar | ruedita: cambiar tamaño | 1-9: seleccionar formas",
             10, 10, textColor, font);
 
-        char buffer[128];
-        snprintf(buffer, sizeof(buffer), "tamaño: %.2f", currentRadius);
-        renderer->drawText(buffer, 10, 40, textColor, font);
+        char buffer1[128];
+        snprintf(buffer1, sizeof(buffer1), "cuerpo: %s", getShapeName(shape));
+        renderer->drawText(buffer1, 10, 40, textColor, font);
+
+        char buffer2[128];
+        snprintf(buffer2, sizeof(buffer2), "tamaño: %.2f", currentRadius);
+        renderer->drawText(buffer2, 10, 70, textColor, font);
 
         // si hay una bola seleccionada, mostrar sus coordenadas
         if (input->selected) {
             char buffer[128];
             snprintf(buffer, sizeof(buffer), "seleccionado: (%.1f, %.1f)",
                 input->selected->pos.x, input->selected->pos.y);
-            renderer->drawText(buffer, 10, 70, textColor, font);
+            renderer->drawText(buffer, 10, 100, textColor, font);
         }
     }
 

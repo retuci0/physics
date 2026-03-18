@@ -13,42 +13,9 @@ public:
 		return &INSTANCE;
 	}
 
-    void drawFilledCircle(int x0, int y0, int r, Color c) const {
-        SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
-        for (int y = -r; y <= r; y++) {
-            for (int x = -r; x <= r; x++) {
-                if (x * x + y * y <= r * r) {
-                    SDL_RenderDrawPoint(renderer, x0 + x, y0 + y);
-                }
-            }
-        }
-    }
-
-    void drawFilledRect(int x, int y, int hw, int hh, Color c) const {
-        SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
-        SDL_Rect rect = {
-            x - hw,
-            y - hh,
-            hw * 2,
-            hh * 2
-        };
-        SDL_RenderFillRect(renderer, &rect);
-    }
-
-    void drawText(const char* text, int x, int y, SDL_Color color, TTF_Font* font) const {
-        if (!font || !text) return;
-
-        SDL_Surface* surface = TTF_RenderText_Blended(font, text, color);
-        if (!surface) return;
-
-        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_Rect dest = { x, y, surface->w, surface->h };
-
-        SDL_RenderCopy(renderer, texture, NULL, &dest);
-
-        SDL_DestroyTexture(texture);
-        SDL_FreeSurface(surface);
-    }
+	void drawFilledCircle(int x0, int y0, int r, Color c) const;
+	void drawFilledRect(int x, int y, int hw, int hh, Color c) const;
+	void drawText(const char* text, int x, int y, SDL_Color color, TTF_Font* font) const;
 
 private:
     Renderer() = default;

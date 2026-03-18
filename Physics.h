@@ -45,6 +45,7 @@ public:
 	std::unique_ptr<World> world;
 
 	float currentRadius = 20.0f;
+	ShapeType shape = ShapeType::CIRCLE;
 
 	void requestQuit() {
 		running = false;

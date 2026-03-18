@@ -2,7 +2,23 @@
 
 #include "Vec2.h"
 #include <vector>
+#include <string>
 
+enum class ShapeType {
+	CIRCLE,
+	RECT
+};
+
+static const std::string getShapeName(ShapeType shape) {
+	switch (shape) {
+		case ShapeType::CIRCLE:
+			return "bola";
+			break;
+		case ShapeType::RECT:
+			return "cubo";
+			break;
+	}
+}
 
 class Shape {
 public:

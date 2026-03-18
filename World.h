@@ -26,6 +26,16 @@ public:
 		bodies.push_back(std::move(body));
 	}
 
+	bool removeBody(RigidBody* body) {
+		for (int i = 0; i < bodies.size(); i++) {
+			if (bodies[i].get() == body) {
+				bodies.erase(bodies.begin() + i);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	const std::vector<std::unique_ptr<RigidBody>>& getBodies() const {
 		return bodies;
 	}

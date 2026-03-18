@@ -142,6 +142,7 @@ xcopy /y "C:\dev\SDL2_ttf-2.24.0\lib\x64\SDL2_ttf.dll" "$(OutDir)"</Command>
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -36,8 +36,26 @@ void Input::tick(const SDL_Event& event) {
 
 // teclado
 void Input::onKey(int key, int action) {
-    if (key == SDLK_ESCAPE && action == Action::PRESS) {
-        PhysicsEngine::getInstance()->requestQuit();
+    if (action == Action::PRESS) {
+        keys[key] = true;
+    } else if (action == Action::RELEASE) {
+        keys[key] = false;
+    }
+
+    if (action == Action::PRESS) {
+        if (key == SDLK_ESCAPE) {
+             PhysicsEngine::getInstance()->requestQuit();
+        } else {
+            PhysicsEngine* pe = PhysicsEngine::getInstance();
+            switch (key) {
+                case SDLK_1:
+                    pe->shape = ShapeType::CIRCLE;
+                    break;
+                case SDLK_2:
+                    pe->shape = ShapeType::RECT;
+                    break;
+            }
+        }
     }
 }
 
@@ -45,13 +63,27 @@ void Input::onKey(int key, int action) {
 void Input::onClick(int button, int action, int mx, int my) {
     PhysicsEngine* pe = PhysicsEngine::getInstance();
 
-    // crear nuevo círculo
+    // crear cuerpos
     if (button == MouseButton::MIDDLE && action == Action::PRESS) {
-        pe->world->addBody(std::make_unique<RigidBody>(Vec2f(mx, my), 1.0f, std::make_unique<CircleShape>(pe->currentRadius)));
+        switch (pe->shape) {
+            case ShapeType::CIRCLE:
+                pe->world->addBody(std::make_unique<RigidBody>(Vec2f(mx, my), 1.0f, std::make_unique<CircleShape>(pe->currentRadius)));
+                break;
+            case ShapeType::RECT:
+                pe->world->addBody(std::make_unique<RigidBody>(Vec2f(mx, my), 1.0f, std::make_unique<RectangleShape>(pe->currentRadius, pe->currentRadius)));
+                break;
+        }
     }
 
+    // eliminar cuerpos
     if (button == MouseButton::RIGHT && action == Action::PRESS) {
-        pe->world->addBody(std::make_unique<RigidBody>(Vec2f(mx, my), 1.0f, std::make_unique<RectangleShape>(pe->currentRadius, pe->currentRadius)));
+        for (auto& body : pe->world->getBodies()) {
+            Vec2f mousePos(mx, my);
+            if (body->contains(mousePos)) {
+                pe->world->removeBody(body.get());
+                break;
+            }
+        }
     }
 
     // agarrar cuerpo
@@ -102,6 +134,10 @@ void Input::onMouseWheel(int delta) {
     pe->currentRadius = std::clamp(pe->currentRadius + delta, 1.0f, 200.0f);
 }
 
+
+bool Input::isKeyDown(int key) const {
+    return keys[key];
+}
 
 // agarrar un cuerpo
 void Input::selectBody(const Vec2f& mousePos, RigidBody* body) {
