@@ -25,6 +25,9 @@
     <Filter Include="Source Files\render">
       <UniqueIdentifier>{5d8abd88-1d09-47f4-a4ee-c34fcd222872}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\input">
+      <UniqueIdentifier>{8c0fa42b-3440-4fa0-8f6a-37db1c2bef36}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Physics.cpp">
@@ -36,6 +39,9 @@
     <ClCompile Include="World.cpp">
       <Filter>Source Files\world</Filter>
     </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Source Files\input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Physics.h">
@@ -44,7 +50,7 @@
     <ClInclude Include="Vec2.h">
       <Filter>Source Files\math</Filter>
     </ClInclude>
-    <ClInclude Include="Shape.h">
+    <ClInclude Include="Shapes.h">
       <Filter>Source Files\body</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.h">
@@ -52,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="Color.h">
       <Filter>Source Files\render</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Source Files\input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -61,5 +70,9 @@
     <None Include="World.h">
       <Filter>Source Files\world</Filter>
     </None>
+    <None Include=".gitignore" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="todo.txt" />
   </ItemGroup>
 </Project>

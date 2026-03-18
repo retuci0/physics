@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RigidBody.h"
+#include "Shapes.h"
 #include "Vec2.h"
 #include <vector>
 #include <memory>

@@ -24,7 +24,18 @@ public:
         }
     }
 
-    void drawText(const char* text, int x, int y, SDL_Color color, TTF_Font* font) {
+    void drawFilledRect(int x, int y, int hw, int hh, Color c) const {
+        SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
+        SDL_Rect rect = {
+            x - hw,
+            y - hh,
+            hw * 2,
+            hh * 2
+        };
+        SDL_RenderFillRect(renderer, &rect);
+    }
+
+    void drawText(const char* text, int x, int y, SDL_Color color, TTF_Font* font) const {
         if (!font || !text) return;
 
         SDL_Surface* surface = TTF_RenderText_Blended(font, text, color);

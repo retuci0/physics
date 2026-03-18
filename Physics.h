@@ -1,10 +1,16 @@
 #pragma once
 
-#include "World.h"
+#include "Input.h"
 #include "Renderer.h"
+#include "World.h"
+
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <memory>
+
+
+constexpr int SCREEN_WIDTH = 800;
+constexpr int SCREEN_HEIGHT = 600;
 
 
 class PhysicsEngine {
@@ -15,39 +21,33 @@ private:
 	bool createRenderer(SDL_Renderer** renderer);
 	bool createFont(TTF_Font** font);
 
-	void onKey(int key, int action);
-	void onClick(int button, int action, int mx, int my);
-	void onMouseMove(int mx, int my);
-	void onMouseWheel(int delta);
-
 	void render();
 
 	bool running = true; 
 
-	float currentRadius = 20.0f;
-
-	Vec2f lastMousePos;
-	Uint32 lastMouseTime;
-	bool dragging = false;
-
 	SDL_Window* sdlWindow = nullptr;
 	SDL_Event sdlEvent;
-
-	RigidBody* selected = nullptr;
-
-	Renderer* renderer = Renderer::getInstance();
-	std::unique_ptr<World> world;
 
 	TTF_Font* font = nullptr;
 	SDL_Color textColor = Color::WHITE.toSDLColor();
 
 public:
-	int run(int argc, char** argv);
-	void quit();
-
 	static PhysicsEngine* getInstance() {
 		static PhysicsEngine INSTANCE;
 		return &INSTANCE;
+	}
+
+	int run(int argc, char** argv);
+	void quit();
+
+	Renderer* renderer = Renderer::getInstance();
+	Input* input = Input::getInstance();
+	std::unique_ptr<World> world;
+
+	float currentRadius = 20.0f;
+
+	void requestQuit() {
+		running = false;
 	}
 };
 

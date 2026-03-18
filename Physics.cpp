@@ -1,25 +1,19 @@
 #include "Physics.h"
 
 #include "Color.h"
+#include "Input.h"
 #include "Renderer.h"
 
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <memory>
 
 
-constexpr int SCREEN_WIDTH = 800;
-constexpr int SCREEN_HEIGHT = 600;
-
-PhysicsEngine* engine = PhysicsEngine::getInstance();
-
-
 int main(int argc, char** argv) {
-    return engine->run(argc, argv);
+    return PhysicsEngine::getInstance()->run(argc, argv);
 }
 
 
@@ -55,33 +49,12 @@ int PhysicsEngine::run(int argc, char** argv) {
         lastTime = currentTime;
 
         while (SDL_PollEvent(&sdlEvent) != 0) {
-            // cerrar ventana
-            if (sdlEvent.type == SDL_QUIT) {
-                running = false;
-            }
-
-            // gestión de teclas
-            else if (sdlEvent.type == SDL_KEYDOWN) {
-                if (sdlEvent.key.repeat) {
-                    onKey(sdlEvent.key.keysym.sym, Action::REPEAT);
-                } else {
-                    onKey(sdlEvent.key.keysym.sym, Action::PRESS);
-                }
-            }  else if (sdlEvent.type == SDL_KEYUP) {
-                onKey(sdlEvent.key.keysym.sym, Action::RELEASE);
-            }
-
-            // gestión del ratón
-            else if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) {
-                onClick(sdlEvent.button.button, Action::PRESS, sdlEvent.motion.x, sdlEvent.motion.y);
-            } else if (sdlEvent.type == SDL_MOUSEBUTTONUP) {
-                onClick(sdlEvent.button.button, Action::RELEASE, sdlEvent.motion.x, sdlEvent.motion.y);
-            } else if (sdlEvent.type == SDL_MOUSEMOTION) {
-                onMouseMove(sdlEvent.motion.x, sdlEvent.motion.y);
-            } else if (sdlEvent.type == SDL_MOUSEWHEEL) {
-                onMouseWheel(sdlEvent.wheel.y);
-            }
+            input->tick(sdlEvent);
         }
+
+        int mouseX, mouseY;
+        Uint32 buttons = SDL_GetMouseState(&mouseX, &mouseY);
+        input->onMouseMove(mouseX, mouseY);
         
         world->tick(dt);
         render();
@@ -141,68 +114,6 @@ bool PhysicsEngine::createFont(TTF_Font** font) {
 }
 
 
-/* EVENTOS */
-
-// teclado
-void PhysicsEngine::onKey(int key, int action) {
-    if (key == SDLK_ESCAPE && action == Action::PRESS) {
-        running = false;
-    }
-}
-
-// clic del ratón
-void PhysicsEngine::onClick(int button, int action, int mx, int my) {
-    // crear nuevo cuerpo
-    if (button == MouseButton::MIDDLE && action == Action::PRESS) {
-        world->addBody(std::make_unique<RigidBody>(Vec2f(mx, my), 1.0f, std::make_unique<CircleShape>(currentRadius)));
-    }
-
-    // agarrar cuerpo
-    if (button == MouseButton::LEFT && action == Action::PRESS) {
-        for (auto& body : world->getBodies()) {
-            if (auto circle = dynamic_cast<CircleShape*>(body->shape.get())) {
-                Vec2f mousePos(mx, my);
-                if ((body->pos - mousePos).sqlen() <= circle->radius * circle->radius) {
-                    selected = body.get();
-                    lastMousePos = mousePos;
-                    lastMouseTime = SDL_GetTicks();
-                    dragging = true;
-                    break;
-                }
-            }
-        }
-    } 
-    
-    // soltar cuerpo
-    else if (button == MouseButton::LEFT && action == Action::RELEASE) {
-        selected = nullptr;
-        dragging = false;
-    }
-}
-
-// mover ratón
-void PhysicsEngine::onMouseMove(int mx, int my) {
-    if (selected && dragging) {
-        Uint32 currentTime = SDL_GetTicks();
-        float dt = (currentTime - lastMouseTime) / 1000.0f;
-        if (dt > 0) {
-            Vec2f newPos(mx, my);
-            Vec2f dr = newPos - lastMousePos;
-            selected->vel = dr / dt;
-            selected->pos = newPos;
-            lastMousePos = newPos;
-            lastMouseTime = currentTime;
-        }
-    }
-}
-
-// ruedita
-void PhysicsEngine::onMouseWheel(int delta) {
-    currentRadius = std::clamp(currentRadius + delta, 1.0f, 200.0f);
-}
-
-
-
 void PhysicsEngine::render() {
     SDL_SetRenderDrawColor(renderer->renderer, 0x00, 0x00, 0x00, 0xFF);
     SDL_RenderClear(renderer->renderer);
@@ -216,23 +127,31 @@ void PhysicsEngine::render() {
                 circle->radius,
                 Color::SILVER
             );
+        } else if (auto rect = dynamic_cast<RectangleShape*>(body->shape.get())) {
+            renderer->drawFilledRect(
+                static_cast<int>(std::round(body->pos.x)),
+                static_cast<int>(std::round(body->pos.y)),
+                rect->halfWidth,
+                rect->halfHeight,
+                Color::GREEN
+            );
         }
     }
 
     // texto
     if (font) {
-        renderer->drawText("clic izq.: arrastrar bola | ruedita (pulsar): crear bola | ruedita: cambiar tamaño de bola",
+        renderer->drawText("clic izq.: arrastrar bola | ruedita (pulsar): crear bola | clic dcho.: crear cuadrado | ruedita: cambiar tamaño",
             10, 10, textColor, font);
 
         char buffer[128];
-        snprintf(buffer, sizeof(buffer), "radio de bola: %.2f", currentRadius);
+        snprintf(buffer, sizeof(buffer), "tamaño: %.2f", currentRadius);
         renderer->drawText(buffer, 10, 40, textColor, font);
 
         // si hay una bola seleccionada, mostrar sus coordenadas
-        if (selected) {
+        if (input->selected) {
             char buffer[128];
-            snprintf(buffer, sizeof(buffer), "bola seleccionada: (%.1f, %.1f)",
-                selected->pos.x, selected->pos.y);
+            snprintf(buffer, sizeof(buffer), "seleccionado: (%.1f, %.1f)",
+                input->selected->pos.x, input->selected->pos.y);
             renderer->drawText(buffer, 10, 70, textColor, font);
         }
     }

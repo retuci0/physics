@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Vec2.h"
-#include "Shape.h"
+#include "Shapes.h"
 #include <memory>
 
 
@@ -28,5 +28,9 @@ public:
 	void update(float dt) {
 		pos = pos + vel * dt;
 		rotation += angularVel * dt;
+	}
+
+	bool contains(Vec2f p) const {
+		return shape->contains(p, pos);
 	}
 };
